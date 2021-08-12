@@ -1,47 +1,39 @@
-import client from '../lib/client.js';
-import supertest from 'supertest';
+import pool from '../lib/utils/pool.js';
+import setup from '../data/setup.js';
+import request from 'supertest';
 import app from '../lib/app.js';
-import { execSync } from 'child_process';
 
-const request = supertest(app);
+// import Planet from '../lib/models/Planet.js';
+// remember, numerical values are not be wrapped in strings
 
-describe('API Routes', () => {
 
-  afterAll(async () => {
-    return client.end();
+describe('Planet routes', () => {
+  beforeEach(() => {
+    return setup(pool);
   });
 
-  describe('/api/cats', () => {
-    let user;
+  it('creates a planet via. POST', async () => {
+    const res = await request(app)
+      .post('/api/v1/planets')
+      .send({
+        name: 'Venus',
+        moons: 0,
+        namesake: 'Roman Goddess of Love',
+        atmosphere: 'Hot',
+        planet_type: 'Terrestrial',
+        length_of_year: '225 Earth Days',
+        associated_zodiac: 'Taurus, Libra'
+      });
 
-    beforeAll(async () => {
-      execSync('npm run recreate-tables');
-
-      const response = await request
-        .post('/api/auth/signup')
-        .send({
-          name: 'Me the User',
-          email: 'me@user.com',
-          password: 'password'
-        });
-
-      expect(response.status).toBe(200);
-
-      user = response.body;
+    expect(res.body).toEqual({
+      id: '1',
+      name: 'Venus',
+      moons: 0,
+      namesake: 'Roman Goddess of Love',
+      atmosphere: 'Hot',
+      planet_type: 'Terrestrial',
+      length_of_year: '225 Earth Days',
+      associated_zodiac: 'Taurus, Libra'
     });
-
-    // append the token to your requests:
-    //  .set('Authorization', user.token);
-    
-    it('VERB to /api/route [with context]', async () => {
-      
-      // remove this line, here to not have lint error:
-      user.token;
-    
-      // expect(response.status).toBe(200);
-      // expect(response.body).toEqual(?);
-      
-    });
-
   });
 });
